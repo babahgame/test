@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+    <title>TerrGame</title>
+    <script src="phaser/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+<script type="text/javascript">
+//<!--game begins here-->
+
+var game  = new Phaser.Game(800, 320, Phaser.AUTO, '', {preload: preload, create : create, update : update}, false, false);
+
+function preload(){
+	game.load.image('ground', 'assets/platform.png');
+	game.load.spritesheet('terr', 'assets/terr.png', 16,16);
+	game.load.image('parts0', 'assets/parts0.png');
+	game.load.image('parts1', 'assets/parts1.png');
+	game.load.image('parts2', 'assets/parts2.png');
+	game.load.image('parts3', 'assets/parts3.png');
+	game.load.image('parts4', 'assets/parts4.png');
+	game.load.image('parts5', 'assets/parts5.png');
+	game.load.image('box','assets/box.png');
+	game.load.image('shrap','assets/shrap.png');
+}
+
+
+function create(){
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+
+	playerDead = false;
+//add ground
+	platforms = game.add.group();
+	platforms.enableBody = true;
+
+	parts = game.add.group();
+	parts.enableBody = true;
+
+	for(var i = 0; i <= game.world.width; i+=32){
+		var ground = platforms.create(i, game.world.height - 32, 'ground');
+		ground.scale.setTo(2,2);
+		ground.body.immovable = true;
+	}
+
+	player = game.add.sprite(10, game.world.height - 100, 'terr');	
+	player.scale.setTo(2,2);
+	game.physics.arcade.enable(player);
+	player.body.bounce.y = 0.1;
+	player.body.gravity.y = 500;
+	player.body.colliderWorldBounds = true;
+	player.anchor.setTo(.5,1);
+
+	player.animations.add('left', [0,1,2,1], 15, true);
+	player.animations.add('right', [0,1,2,1], 15, true);
+//adding boxes on the stage
+	boxes = game.add.group();
+	boxes.enableBody = true;
+	for(var i = 0; i <= 12; i++){
+		var box = boxes.create(i*30, game.world.height - 100, 'box');
+		box.body.gravity.y = 10000;
+		box.body.colliderWorldBounds = true;
+		box.body.bounce.y = 0.2;
+		box.body.velocity.setTo(0,0);
+	}
+
+}
+
+function randomInt(min, max){
+	return Math.random()*(max - min) + min;
+}
+
+function explode(player){
+	player.kill();
+		var part0 = parts.create(player.x, player.y-20, 'parts0');
+		part0.scale.setTo(2,2);
+		part0.body.gravity.y = 80;
+		part0.body.bounce = 0.2;
+		part0.body.velocity.setTo(randomInt(-100,100), randomInt(-60,-100));
+		var part1 = parts.create(player.x, player.y-20, 'parts1');
+		part1.scale.setTo(2,2);
+		part1.body.gravity.y = 50;
+		part1.body.bounce = 0.2;
+		part1.body.velocity.setTo(randomInt(-100,100), randomInt(-60,-100));
+		var part2 = parts.create(player.x, player.y-20, 'parts2');
+		part2.scale.setTo(2,2);
+		part2.body.gravity.y = 50;
+		part2.body.bounce = 0.2;
+		part2.body.velocity.setTo(randomInt(-100,100), randomInt(-60,-100));
+		var part3 = parts.create(player.x, player.y-20, 'parts3');
+		part3.scale.setTo(2,2);
+		part3.body.gravity.y = 50;
+		part3.body.bounce = 0.2;
+		part3.body.velocity.setTo(randomInt(-100,100), randomInt(-60,-100));
+		var part4 = parts.create(player.x, player.y-20, 'parts4');
+		part4.scale.setTo(2,2);
+		part4.body.gravity.y = 50;
+		part4.body.bounce = 0.2;
+		part4.body.velocity.setTo(randomInt(-100,100), randomInt(-60,-100));
+		var part5 = parts.create(player.x, player.y-20, 'parts5');
+		part5.scale.setTo(2,2);
+		part5.body.gravity.y = 100;
+		part5.body.bounce = 0.2;
+		part5.body.velocity.setTo(randomInt(-100,100), randomInt(-60,-100));
+
+
+}
+
+
+function update(){
+	game.physics.arcade.collide(player, platforms);
+//	game.physics.arcade.collide(player, boxes);
+	game.physics.arcade.collide(boxes,boxes);
+	game.physics.arcade.collide(boxes, platforms);
+//	game.physics.arcade.collide(parts, platforms);
+//	game.physics.arcade.collide(parts, boxes);
+	game.physics.arcade.collide(parts, platforms);
+	game.physics.arcade.collide(parts, boxes);
+
+
+
+	cursors = game.input.keyboard.createCursorKeys();
+	player.body.velocity.x = 0;
+
+	if(cursors.left.isDown){
+		player.scale.setTo(-2,2);
+		player.body.velocity.x = -100;
+		player.animations.play('left');
+
+	} else if (cursors.right.isDown){
+		player.scale.setTo(2,2);
+		player.body.velocity.x = 100;
+		player.animations.play('right');
+	}else if (cursors.up.isDown && playerDead==false){
+		playerDead = true;
+		explode(player);
+	} else {
+		player.animations.stop();
+		player.frame = 0;
+	}
+
+}
+
+//<!--game ends here-->
+</script>
+</body>
+</html>
